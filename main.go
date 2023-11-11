@@ -1,0 +1,5 @@
+package CryptoGainerParser
+
+func main() {
+
+}
