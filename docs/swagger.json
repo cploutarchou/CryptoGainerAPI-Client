@@ -30,6 +30,46 @@
                 }
             }
         },
+        "/binance/ticker/24hr/gainers": {
+            "get": {
+                "description": "Retrieve the top gainers with a specified limit, filtered by ending.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Binance"
+                ],
+                "summary": "Get the top gainers with a specified limit, filtered by ending.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limit the number of results",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter results by ending",
+                        "name": "endingFilter",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/binance.TickerData"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/binance/ticker/24hr/{pair}": {
             "get": {
                 "description": "Retrieve ticker data for a specific trading pair.",

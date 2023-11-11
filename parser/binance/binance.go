@@ -144,7 +144,8 @@ func (b *Binance) GetTickersForPairs(pairSymbols []string) ([]TickerData, error)
 }
 
 // Get24HourGainersTickerData returns the top gainers with a specified limit, filtered by ending.
-func (b *Binance) Get24HourGainersTickerData(limit int, endingFilter string) ([]TickerData, error) {
+// If limit is nil, it will not apply a limit. If endingFilter is nil, it will not filter by ending.
+func (b *Binance) Get24HourGainersTickerData(limit *int, endingFilter *string) ([]TickerData, error) {
 	// Get the 24-hour ticker data
 	tickerData, err := b.Get24HourTickerData()
 	if err != nil {
@@ -159,20 +160,25 @@ func (b *Binance) Get24HourGainersTickerData(limit int, endingFilter string) ([]
 		return gainerPairs[i].PriceChangePercent > gainerPairs[j].PriceChangePercent
 	})
 
-	// Filter gainer pairs by ending
+	// Filter gainer pairs by ending if endingFilter is provided
 	var filteredPairs []TickerData
-	for _, pair := range gainerPairs {
-		if strings.HasSuffix(pair.Symbol, endingFilter) {
-			filteredPairs = append(filteredPairs, pair)
+	if endingFilter != nil {
+		for _, pair := range gainerPairs {
+			if strings.HasSuffix(pair.Symbol, *endingFilter) {
+				filteredPairs = append(filteredPairs, pair)
+			}
 		}
+	} else {
+		// If endingFilter is nil, include all gainer pairs
+		filteredPairs = gainerPairs
 	}
 
-	// Limit the results to the specified limit
-	if limit > 0 && limit <= len(filteredPairs) {
-		return filteredPairs[:limit], nil
+	// Limit the results to the specified limit if limit is provided
+	if limit != nil && *limit > 0 && *limit <= len(filteredPairs) {
+		return filteredPairs[:*limit], nil
 	}
 
-	// Return all filtered gainer pairs if the limit is greater than the number of filtered pairs
+	// Return all filtered gainer pairs if the limit is not provided or greater than the number of filtered pairs
 	return filteredPairs, nil
 }
 

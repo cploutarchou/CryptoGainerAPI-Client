@@ -128,4 +128,30 @@ paths:
       summary: Get ticker data for a specific trading pair
       tags:
       - Binance
+  /binance/ticker/24hr/gainers:
+    get:
+      description: Retrieve the top gainers with a specified limit, filtered by ending.
+      parameters:
+      - description: Limit the number of results
+        in: query
+        name: limit
+        type: integer
+      - description: Filter results by ending
+        in: query
+        name: endingFilter
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/binance.TickerData'
+              type: array
+            type: array
+      summary: Get the top gainers with a specified limit, filtered by ending.
+      tags:
+      - Binance
 swagger: "2.0"

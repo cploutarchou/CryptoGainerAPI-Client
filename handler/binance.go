@@ -6,11 +6,13 @@ import (
 	"github.com/cploutarchou/CryptoGainerAPI-Client/parser/binance"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 type Binance interface {
 	Get24HourTickerData(c *gin.Context)
 	GetTickerForPair(c *gin.Context)
+	Get24HourGainersTickerData(c *gin.Context)
 }
 
 type BinanceImpl struct {
@@ -54,6 +56,29 @@ func (h *BinanceImpl) GetTickerForPair(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	c.JSON(http.StatusOK, ticker)
+}
+
+// Get24HourGainersTickerData
+//
+//	@Summary		Get the top gainers with a specified limit, filtered by ending.
+//	@Description	Retrieve the top gainers with a specified limit, filtered by ending.
+//	@Produce		json
+//	@Tags			Binance
+//	@Param			limit			query	int		false	"Limit the number of results"
+//	@Param			endingFilter	query	string	false	"Filter results by ending"
+//	@Success		200				{array}	TickerData
+//	@Router			/binance/ticker/24hr/gainers [get]
+func (h *BinanceImpl) Get24HourGainersTickerData(c *gin.Context) {
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
+	endingFilter := c.DefaultQuery("endingFilter", "")
+
+	ticker, err := h.parser.Binance().Get24HourGainersTickerData(&limit, &endingFilter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, ticker)
 }
 
