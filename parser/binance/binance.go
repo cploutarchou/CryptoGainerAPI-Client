@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -13,15 +14,15 @@ const (
 )
 
 // Binance is a struct representing the Binance API client.
-type Binance struct {
+type Client struct {
 	apiKey    string
 	apiSecret string
 	client    *http.Client
 }
 
-// New creates a new instance of the Binance API client.
-func New(apiKey, apiSecret string) *Binance {
-	return &Binance{
+// NewClient creates a new instance of the Binance API client.
+func NewClient(apiKey, apiSecret string) *Client {
+	return &Client{
 		apiKey:    apiKey,
 		apiSecret: apiSecret,
 		client:    &http.Client{},
@@ -29,7 +30,7 @@ func New(apiKey, apiSecret string) *Binance {
 }
 
 // Get24HourTickerData returns 24-hour price statistics mapped to TickerData for all trading pairs.
-func (b *Binance) Get24HourTickerData() ([]TickerData, error) {
+func (c *Client) Get24HourTickerData() ([]TickerData, error) {
 	url := fmt.Sprintf("%s/ticker/24hr", baseURL)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -37,9 +38,9 @@ func (b *Binance) Get24HourTickerData() ([]TickerData, error) {
 		return nil, err
 	}
 
-	req.Header.Set("X-MBX-APIKEY", b.apiKey)
+	req.Header.Set("X-MBX-APIKEY", c.apiKey)
 
-	resp, err := b.client.Do(req)
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func (b *Binance) Get24HourTickerData() ([]TickerData, error) {
 }
 
 // GetTickerForPair returns 24-hour price statistics for a specific trading pair.
-func (b *Binance) GetTickerForPair(pairSymbol string) (TickerData, error) {
+func (c *Client) GetTickerForPair(pairSymbol string) (TickerData, error) {
 	url := fmt.Sprintf("%s/ticker/24hr?symbol=%s", baseURL, pairSymbol)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -76,9 +77,9 @@ func (b *Binance) GetTickerForPair(pairSymbol string) (TickerData, error) {
 		return TickerData{}, err
 	}
 
-	req.Header.Set("X-MBX-APIKEY", b.apiKey)
+	req.Header.Set("X-MBX-APIKEY", c.apiKey)
 
-	resp, err := b.client.Do(req)
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return TickerData{}, err
 	}
@@ -103,7 +104,7 @@ func (b *Binance) GetTickerForPair(pairSymbol string) (TickerData, error) {
 }
 
 // GetTickersForPairs returns 24-hour price statistics for specific trading pairs.
-func (b *Binance) GetTickersForPairs(pairSymbols []string) ([]TickerData, error) {
+func (c *Client) GetTickersForPairs(pairSymbols []string) ([]TickerData, error) {
 	var tickerDataSlice []TickerData
 
 	for _, pairSymbol := range pairSymbols {
@@ -114,9 +115,9 @@ func (b *Binance) GetTickersForPairs(pairSymbols []string) ([]TickerData, error)
 			return nil, err
 		}
 
-		req.Header.Set("X-MBX-APIKEY", b.apiKey)
+		req.Header.Set("X-MBX-APIKEY", c.apiKey)
 
-		resp, err := b.client.Do(req)
+		resp, err := c.client.Do(req)
 		if err != nil {
 			return nil, err
 		}
@@ -143,43 +144,175 @@ func (b *Binance) GetTickersForPairs(pairSymbols []string) ([]TickerData, error)
 	return tickerDataSlice, nil
 }
 
-// Get24HourGainersTickerData returns the top gainers with a specified limit, filtered by ending.
-// If limit is nil, it will not apply a limit. If endingFilter is nil, it will not filter by ending.
-func (b *Binance) Get24HourGainersTickerData(limit *int, endingFilter *string) ([]TickerData, error) {
-	// Get the 24-hour ticker data
+// Get24HourGainersTickerData returns all trading pairs with a positive price change percent
+// of more than +2% over the last 24 hours, sorted by performance (descending order).
+func (b *Client) Get24HourGainersTickerData(limit int, endingFilter string) ([]TickerData, error) {
 	tickerData, err := b.Get24HourTickerData()
 	if err != nil {
 		return nil, err
 	}
 
-	// Filter profitable (gainer) pairs from the retrieved data
-	gainerPairs := filterProfitablePairs(tickerData)
-
-	// Sort the gainer pairs by performance (positive price change percent)
-	sort.Slice(gainerPairs, func(i, j int) bool {
-		return gainerPairs[i].PriceChangePercent > gainerPairs[j].PriceChangePercent
-	})
-
-	// Filter gainer pairs by ending if endingFilter is provided
+	// Filter trading pairs with more than +2% price change and parse percent to float
 	var filteredPairs []TickerData
-	if endingFilter != nil {
-		for _, pair := range gainerPairs {
-			if strings.HasSuffix(pair.Symbol, *endingFilter) {
+	for _, pair := range tickerData {
+		fmt.Printf("Raw PriceChangePercent for %s: %s\n", pair.Symbol, pair.PriceChangePercent) // Debug print
+
+		priceChangePercent := pair.PriceChangePercent
+		if strings.HasPrefix(priceChangePercent, "+") {
+			percentage, err := strconv.ParseFloat(strings.TrimSuffix(priceChangePercent, "%"), 64)
+			fmt.Printf("Parsed percentage for %s: %f\n", pair.Symbol, percentage) // Debug print
+
+			if err == nil && percentage > 2.0 && strings.HasSuffix(pair.Symbol, endingFilter) {
 				filteredPairs = append(filteredPairs, pair)
 			}
 		}
-	} else {
-		// If endingFilter is nil, include all gainer pairs
-		filteredPairs = gainerPairs
 	}
 
-	// Limit the results to the specified limit if limit is provided
-	if limit != nil && *limit > 0 && *limit <= len(filteredPairs) {
-		return filteredPairs[:*limit], nil
+	// Sort the filtered pairs by performance (positive price change percent) in descending order
+	sort.Slice(filteredPairs, func(i, j int) bool {
+		percentI, _ := strconv.ParseFloat(strings.TrimSuffix(filteredPairs[i].PriceChangePercent, "%"), 64)
+		percentJ, _ := strconv.ParseFloat(strings.TrimSuffix(filteredPairs[j].PriceChangePercent, "%"), 64)
+		return percentI > percentJ
+	})
+
+	// Apply the limit if specified
+	if limit > 0 && limit < len(filteredPairs) {
+		filteredPairs = filteredPairs[:limit]
 	}
 
-	// Return all filtered gainer pairs if the limit is not provided or greater than the number of filtered pairs
+	// Print sorted results before applying the limit
+	for _, pair := range filteredPairs {
+		fmt.Printf("Sorted pair: %s, Change: %s\n", pair.Symbol, pair.PriceChangePercent)
+	}
+
 	return filteredPairs, nil
+}
+
+// GetTickersGainerForPairs returns formatted trading pair symbols as strings.
+func (c *Client) GetTickersGainerForPairs(limit int, endingFilter, excludeFilter string) ([]string, error) {
+	// First, fetch all tickers.
+	allTickers, err := c.Get24HourTickerData()
+	if err != nil {
+		return nil, err
+	}
+
+	// Filter profitable pairs.
+	gainerPairs := filterProfitablePairs(allTickers)
+
+	// Apply the ending filter.
+	filteredPairs := filterPairsByEnding(gainerPairs, endingFilter)
+
+	// Apply the exclude filter.
+	finalPairs := make([]TickerData, 0)
+	for _, pair := range filteredPairs {
+		if !strings.Contains(pair.Symbol, excludeFilter) {
+			finalPairs = append(finalPairs, pair)
+		}
+	}
+
+	// Sort the pairs by performance.
+	sortPairsByPerformance(finalPairs)
+
+	// Extract the symbols and apply the limit.
+	tradingPairSymbols := extractTradingPairSymbols(finalPairs, limit)
+
+	// Format the pairs.
+	formattedPairs := formatPairs(tradingPairSymbols, endingFilter)
+	return formattedPairs, nil
+}
+
+// formatPairs takes a slice of symbols and appends a "/" between the base currency and the endingFilter.
+func formatPairs(symbols []string, endingFilter string) []string {
+	var formattedPairs []string
+	for _, symbol := range symbols {
+		// Trim the endingFilter from the symbol and add it back with a "/" for formatting.
+		base := strings.TrimSuffix(symbol, endingFilter)
+		formattedPair := base + "/" + endingFilter
+		formattedPairs = append(formattedPairs, formattedPair)
+	}
+	return formattedPairs
+}
+
+// Function to filter profitable pairs
+func filterProfitablePairs(data []TickerData) []TickerData {
+	var profitablePairs []TickerData
+
+	for _, pair := range data {
+		priceChangePercent := pair.PriceChangePercent
+		if priceChangePercent[0] != '-' {
+			profitablePairs = append(profitablePairs, pair)
+		}
+	}
+
+	return profitablePairs
+}
+
+// FilterPairsByEnding filters pairs by ending if endingFilter is provided.
+func filterPairsByEnding(data []TickerData, endingFilter string) []TickerData {
+	var filteredPairs []TickerData
+
+	for _, pair := range data {
+		if strings.HasSuffix(pair.Symbol, endingFilter) {
+			filteredPairs = append(filteredPairs, pair)
+		}
+	}
+
+	return filteredPairs
+}
+
+// Updated sorting function to sort based on the price change percent.
+func sortPairsByPerformance(data []TickerData) {
+	sort.Slice(data, func(i, j int) bool {
+		// Convert price change percent to float for sorting.
+		percentI, _ := strconv.ParseFloat(strings.TrimSuffix(data[i].PriceChangePercent, "%"), 64)
+		percentJ, _ := strconv.ParseFloat(strings.TrimSuffix(data[j].PriceChangePercent, "%"), 64)
+		return percentI > percentJ
+	})
+}
+
+func extractTradingPairSymbols(data []TickerData, limit int) []string {
+	var symbols []string
+	for i, pair := range data {
+		if limit > 0 && i >= limit {
+			break
+		}
+		symbols = append(symbols, pair.Symbol)
+	}
+	return symbols
+}
+
+// FilterPairsEndingWith returns pairs that end with the specified ending.
+func (c *Client) FilterPairsEndingWith(ending string) ([]string, error) {
+	tickerData, err := c.Get24HourTickerData()
+	if err != nil {
+		return nil, err
+	}
+
+	var filteredPairs []string
+
+	for _, data := range tickerData {
+		if strings.HasSuffix(data.Symbol, ending) {
+			filteredPairs = append(filteredPairs, data.Symbol)
+		}
+	}
+
+	return filteredPairs, nil
+}
+
+// HasMoreThanTwoConsecutiveZeros checks if a string has more than two consecutive zeros.
+func hasMoreThanTwoConsecutiveZeros(s string) bool {
+	count := 0
+	for _, char := range s {
+		if char == '0' {
+			count++
+			if count > 2 {
+				return true
+			}
+		} else {
+			count = 0
+		}
+	}
+	return false
 }
 
 // mapToBinanceTickerData maps JSON data to TickerData struct.

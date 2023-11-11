@@ -81,6 +81,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/binance/ticker/24hr/gainers/pairs": {
+            "get": {
+                "description": "Retrieve the top gainers with a specified limit, filtered by ending and exclusion.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Binance"
+                ],
+                "summary": "Get the top gainers with a specified limit, filtered by ending and exclusion.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limit the number of results",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter results by ending",
+                        "name": "endingFilter",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Exclude results with specific ending",
+                        "name": "exclude",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/binance.TickerData"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/binance/ticker/24hr/{pair}": {
             "get": {
                 "description": "Retrieve ticker data for a specific trading pair.",
@@ -166,6 +212,9 @@ const docTemplate = `{
                 "priceChangePercent": {
                     "type": "string"
                 },
+                "priceChangePercentFloat": {
+                    "type": "number"
+                },
                 "quoteVolume": {
                     "type": "string"
                 },
@@ -233,6 +282,9 @@ const docTemplate = `{
                 },
                 "priceChangePercent": {
                     "type": "string"
+                },
+                "priceChangePercentFloat": {
+                    "type": "number"
                 },
                 "quoteVolume": {
                     "type": "string"

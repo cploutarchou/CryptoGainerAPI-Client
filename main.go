@@ -31,6 +31,7 @@ func main() {
 			binance.GET("/ticker/24hr", handlers.Binance().Get24HourTickerData)
 			binance.GET("/ticker/24hr/:pair", handlers.Binance().GetTickerForPair)
 			binance.GET("/ticker/24hr/gainers", handlers.Binance().Get24HourGainersTickerData)
+			binance.GET("/ticker/24hr/gainers/pairs", handlers.Binance().Get24HourGainersPairs)
 
 		}
 	}

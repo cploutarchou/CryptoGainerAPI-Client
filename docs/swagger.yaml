@@ -35,6 +35,8 @@ definitions:
         type: string
       priceChangePercent:
         type: string
+      priceChangePercentFloat:
+        type: number
       quoteVolume:
         type: string
       symbol:
@@ -80,6 +82,8 @@ definitions:
         type: string
       priceChangePercent:
         type: string
+      priceChangePercentFloat:
+        type: number
       quoteVolume:
         type: string
       symbol:
@@ -152,6 +156,38 @@ paths:
               type: array
             type: array
       summary: Get the top gainers with a specified limit, filtered by ending.
+      tags:
+      - Binance
+  /binance/ticker/24hr/gainers/pairs:
+    get:
+      description: Retrieve the top gainers with a specified limit, filtered by ending
+        and exclusion.
+      parameters:
+      - description: Limit the number of results
+        in: query
+        name: limit
+        type: integer
+      - description: Filter results by ending
+        in: query
+        name: endingFilter
+        type: string
+      - description: Exclude results with specific ending
+        in: query
+        name: exclude
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/binance.TickerData'
+              type: array
+            type: array
+      summary: Get the top gainers with a specified limit, filtered by ending and
+        exclusion.
       tags:
       - Binance
 swagger: "2.0"
