@@ -1,0 +1,131 @@
+definitions:
+  binance.TickerData:
+    properties:
+      askPrice:
+        type: string
+      askQty:
+        type: string
+      bidPrice:
+        type: string
+      bidQty:
+        type: string
+      closeTime:
+        type: number
+      count:
+        type: integer
+      firstId:
+        type: number
+      highPrice:
+        type: string
+      lastId:
+        type: number
+      lastPrice:
+        type: string
+      lastQty:
+        type: string
+      lowPrice:
+        type: string
+      openPrice:
+        type: string
+      openTime:
+        type: number
+      prevClosePrice:
+        type: string
+      priceChange:
+        type: string
+      priceChangePercent:
+        type: string
+      quoteVolume:
+        type: string
+      symbol:
+        type: string
+      volume:
+        type: string
+      weightedAvgPrice:
+        type: string
+    type: object
+  handler.Ticker:
+    properties:
+      askPrice:
+        type: string
+      askQty:
+        type: string
+      bidPrice:
+        type: string
+      bidQty:
+        type: string
+      closeTime:
+        type: number
+      count:
+        type: integer
+      firstId:
+        type: number
+      highPrice:
+        type: string
+      lastId:
+        type: number
+      lastPrice:
+        type: string
+      lastQty:
+        type: string
+      lowPrice:
+        type: string
+      openPrice:
+        type: string
+      openTime:
+        type: number
+      prevClosePrice:
+        type: string
+      priceChange:
+        type: string
+      priceChangePercent:
+        type: string
+      quoteVolume:
+        type: string
+      symbol:
+        type: string
+      volume:
+        type: string
+      weightedAvgPrice:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /binance/ticker/24hr:
+    get:
+      description: Retrieve 24-hour ticker data for all trading pairs.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/binance.TickerData'
+              type: array
+            type: array
+      summary: Get 24-hour ticker data
+      tags:
+      - Binance
+  /binance/ticker/24hr/{pair}:
+    get:
+      description: Retrieve ticker data for a specific trading pair.
+      parameters:
+      - description: Trading pair symbol (e.g., BTCUSDT)
+        in: path
+        name: pair
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Ticker'
+      summary: Get ticker data for a specific trading pair
+      tags:
+      - Binance
+swagger: "2.0"
