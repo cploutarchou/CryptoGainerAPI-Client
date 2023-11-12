@@ -117,10 +117,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/binance.TickerData"
-                                }
+                                "$ref": "#/definitions/handler.PairListResponse"
                             }
                         }
                     }
@@ -226,6 +223,20 @@ const docTemplate = `{
                 },
                 "weightedAvgPrice": {
                     "type": "string"
+                }
+            }
+        },
+        "handler.PairListResponse": {
+            "type": "object",
+            "properties": {
+                "pairs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "refresh_period": {
+                    "type": "integer"
                 }
             }
         },

@@ -46,6 +46,15 @@ definitions:
       weightedAvgPrice:
         type: string
     type: object
+  handler.PairListResponse:
+    properties:
+      pairs:
+        items:
+          type: string
+        type: array
+      refresh_period:
+        type: integer
+    type: object
   handler.Ticker:
     properties:
       askPrice:
@@ -182,9 +191,7 @@ paths:
           description: OK
           schema:
             items:
-              items:
-                $ref: '#/definitions/binance.TickerData'
-              type: array
+              $ref: '#/definitions/handler.PairListResponse'
             type: array
       summary: Get the top gainers with a specified limit, filtered by ending and
         exclusion.
