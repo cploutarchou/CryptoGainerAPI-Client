@@ -151,8 +151,8 @@ func (c *Client) GetTickersForPairs(pairSymbols []string) ([]TickerData, error) 
 
 // Get24HourGainersTickerData returns all trading pairs with a positive price change percent
 // of more than +2% over the last 24 hours, sorted by performance (descending order).
-func (b *Client) Get24HourGainersTickerData(limit int, endingFilter string) ([]TickerData, error) {
-	allTickers, err := b.Get24HourTickerData()
+func (c *Client) Get24HourGainersTickerData(limit int, endingFilter string) ([]TickerData, error) {
+	allTickers, err := c.Get24HourTickerData()
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +214,7 @@ func (c *Client) GetTickersGainerForPairs(limit int, endingFilter, excludeFilter
 	formattedPairs := formatPairs(tradingPairSymbols, endingFilter)
 	response := PairListResponse{
 		Pairs:         formattedPairs,
-		RefreshPeriod: 10800,
+		RefreshPeriod: 43200, //12h
 	}
 	return response, nil
 }
