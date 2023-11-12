@@ -6,7 +6,7 @@ import (
 )
 
 type Parser interface {
-	Binance() *binance.Client
+	Binance() *binance.Binance
 }
 
 type parserImp struct {
@@ -14,11 +14,11 @@ type parserImp struct {
 	binanceSecret string
 }
 
-func NewBinance(apiKey, apiSecret string) *binance.Client {
+func NewBinance(apiKey, apiSecret string) *binance.Binance {
 	return binance.NewClient(apiKey, apiSecret)
 }
 
-func (p *parserImp) Binance() *binance.Client {
+func (p *parserImp) Binance() *binance.Binance {
 	return NewBinance(p.binanceKey, p.binanceSecret)
 }
 

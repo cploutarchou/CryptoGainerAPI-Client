@@ -19,15 +19,15 @@ type PairListResponse struct {
 }
 
 // Binance is a struct representing the Binance API client.
-type Client struct {
+type Binance struct {
 	apiKey    string
 	apiSecret string
 	client    *http.Client
 }
 
 // NewClient creates a new instance of the Binance API client.
-func NewClient(apiKey, apiSecret string) *Client {
-	return &Client{
+func NewClient(apiKey, apiSecret string) *Binance {
+	return &Binance{
 		apiKey:    apiKey,
 		apiSecret: apiSecret,
 		client:    &http.Client{},
@@ -35,7 +35,7 @@ func NewClient(apiKey, apiSecret string) *Client {
 }
 
 // Get24HourTickerData returns 24-hour price statistics mapped to TickerData for all trading pairs.
-func (c *Client) Get24HourTickerData() ([]TickerData, error) {
+func (c *Binance) Get24HourTickerData() ([]TickerData, error) {
 	url := fmt.Sprintf("%s/ticker/24hr", baseURL)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -74,7 +74,7 @@ func (c *Client) Get24HourTickerData() ([]TickerData, error) {
 }
 
 // GetTickerForPair returns 24-hour price statistics for a specific trading pair.
-func (c *Client) GetTickerForPair(pairSymbol string) (TickerData, error) {
+func (c *Binance) GetTickerForPair(pairSymbol string) (TickerData, error) {
 	url := fmt.Sprintf("%s/ticker/24hr?symbol=%s", baseURL, pairSymbol)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -109,7 +109,7 @@ func (c *Client) GetTickerForPair(pairSymbol string) (TickerData, error) {
 }
 
 // GetTickersForPairs returns 24-hour price statistics for specific trading pairs.
-func (c *Client) GetTickersForPairs(pairSymbols []string) ([]TickerData, error) {
+func (c *Binance) GetTickersForPairs(pairSymbols []string) ([]TickerData, error) {
 	var tickerDataSlice []TickerData
 
 	for _, pairSymbol := range pairSymbols {
@@ -151,50 +151,39 @@ func (c *Client) GetTickersForPairs(pairSymbols []string) ([]TickerData, error) 
 
 // Get24HourGainersTickerData returns all trading pairs with a positive price change percent
 // of more than +2% over the last 24 hours, sorted by performance (descending order).
-func (b *Client) Get24HourGainersTickerData(limit int, endingFilter string) ([]TickerData, error) {
-	tickerData, err := b.Get24HourTickerData()
+func (b *Binance) Get24HourGainersTickerData(limit int, endingFilter string) ([]TickerData, error) {
+	allTickers, err := b.Get24HourTickerData()
 	if err != nil {
 		return nil, err
 	}
 
-	// Filter trading pairs with more than +2% price change and parse percent to float
-	var filteredPairs []TickerData
-	for _, pair := range tickerData {
-		fmt.Printf("Raw PriceChangePercent for %s: %s\n", pair.Symbol, pair.PriceChangePercent) // Debug print
+	// Filter profitable pairs.
+	gainerPairs := filterProfitablePairs(allTickers)
 
-		priceChangePercent := pair.PriceChangePercent
-		if strings.HasPrefix(priceChangePercent, "+") {
-			percentage, err := strconv.ParseFloat(strings.TrimSuffix(priceChangePercent, "%"), 64)
-			fmt.Printf("Parsed percentage for %s: %f\n", pair.Symbol, percentage) // Debug print
+	// Apply the ending filter.
+	filteredPairs := filterPairsByEnding(gainerPairs, endingFilter)
 
-			if err == nil && percentage > 2.0 && strings.HasSuffix(pair.Symbol, endingFilter) {
-				filteredPairs = append(filteredPairs, pair)
-			}
-		}
+	// Apply the exclude filter.
+	finalPairs := make([]TickerData, 0)
+	for _, pair := range filteredPairs {
+
+		finalPairs = append(finalPairs, pair)
+
 	}
 
-	// Sort the filtered pairs by performance (positive price change percent) in descending order
-	sort.Slice(filteredPairs, func(i, j int) bool {
-		percentI, _ := strconv.ParseFloat(strings.TrimSuffix(filteredPairs[i].PriceChangePercent, "%"), 64)
-		percentJ, _ := strconv.ParseFloat(strings.TrimSuffix(filteredPairs[j].PriceChangePercent, "%"), 64)
-		return percentI > percentJ
-	})
+	// Sort the pairs by performance.
+	sortPairsByPerformance(finalPairs)
 
 	// Apply the limit if specified
 	if limit > 0 && limit < len(filteredPairs) {
 		filteredPairs = filteredPairs[:limit]
 	}
 
-	// Print sorted results before applying the limit
-	for _, pair := range filteredPairs {
-		fmt.Printf("Sorted pair: %s, Change: %s\n", pair.Symbol, pair.PriceChangePercent)
-	}
-
 	return filteredPairs, nil
 }
 
 // GetTickersGainerForPairs returns formatted trading pair symbols as strings.
-func (c *Client) GetTickersGainerForPairs(limit int, endingFilter, excludeFilter string) (PairListResponse, error) {
+func (c *Binance) GetTickersGainerForPairs(limit int, endingFilter, excludeFilter string) (PairListResponse, error) {
 	// First, fetch all tickers.
 	allTickers, err := c.Get24HourTickerData()
 	if err != nil {
@@ -291,7 +280,7 @@ func extractTradingPairSymbols(data []TickerData, limit int) []string {
 }
 
 // FilterPairsEndingWith returns pairs that end with the specified ending.
-func (c *Client) FilterPairsEndingWith(ending string) ([]string, error) {
+func (c *Binance) FilterPairsEndingWith(ending string) ([]string, error) {
 	tickerData, err := c.Get24HourTickerData()
 	if err != nil {
 		return nil, err
