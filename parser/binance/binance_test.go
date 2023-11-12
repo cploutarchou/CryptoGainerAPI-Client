@@ -8,9 +8,8 @@ import (
 )
 
 func TestGet24HourTickerDataForPair(t *testing.T) {
-	// Create a mock HTTP server for testing
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Define a sample JSON response for the 24-hour ticker
+
 		jsonResponse := `{
 			"symbol": "BTCUSDT",
 			"priceChangePercent": "2.5",
@@ -35,28 +34,23 @@ func TestGet24HourTickerDataForPair(t *testing.T) {
 			"weightedAvgPrice": "0.00000000"
 		}`
 
-		// Set the response headers
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
-		// Write the JSON response to the client
 		w.Write([]byte(jsonResponse))
 	}))
 	defer server.Close()
 
 	key := os.Getenv("BINANCE_KEY")
 	secret := os.Getenv("BINANCE_SECRET")
-	// Create a Client instance using the mock server's URL
 	binanceClient := NewClient(key, secret)
-	binanceClient.client = server.Client() // Set the client to the mock server's client
+	binanceClient.client = server.Client()
 
-	// Make the API call to the mock server and retrieve BinanceTickerData
 	tickerData, err := binanceClient.GetTickerForPair("BTCUSDT")
 	if err != nil {
 		t.Errorf("Expected no error, but got %v", err)
 	}
 
-	// Check the response data if needed
 	if tickerData.Symbol != "BTCUSDT" {
 		t.Errorf("Expected symbol 'BTCUSDT', but got %s", tickerData.Symbol)
 	}
@@ -64,9 +58,7 @@ func TestGet24HourTickerDataForPair(t *testing.T) {
 }
 
 func TestGet24HourTickerData(t *testing.T) {
-	// Create a mock HTTP server for testing
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Define a sample JSON response for the 24-hour ticker
 		jsonResponse := `{
 			"symbol": "BTCUSDT",
 			"priceChangePercent": "2.5",
@@ -102,11 +94,9 @@ func TestGet24HourTickerData(t *testing.T) {
 
 	key := os.Getenv("BINANCE_KEY")
 	secret := os.Getenv("BINANCE_SECRET")
-	// Create a Client instance using the mock server's URL
 	binanceClient := NewClient(key, secret)
-	binanceClient.client = server.Client() // Set the client to the mock server's client
+	binanceClient.client = server.Client()
 
-	// Make the API call to the mock server and retrieve BinanceTickerData
 	tickerData, err := binanceClient.Get24HourTickerData()
 	if err != nil {
 		t.Errorf("Expected no error, but got %v", err)
