@@ -213,8 +213,8 @@ func (c *Binance) GetTickersGainerForPairs(limit int, endingFilter, excludeFilte
 	// Format the pairs.
 	formattedPairs := formatPairs(tradingPairSymbols, endingFilter)
 	response := PairListResponse{
-		Pairs:         formattedPairs, // Your list of formatted pairs from the Go function
-		RefreshPeriod: 3600,           // 3600 seconds = 1 hour
+		Pairs:         formattedPairs,
+		RefreshPeriod: 10800,
 	}
 	return response, nil
 }
