@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/cploutarchou/CryptoGainerAPI-Client/parser"
 	"github.com/cploutarchou/CryptoGainerAPI-Client/parser/binance"
 	"github.com/gin-gonic/gin"
@@ -9,10 +8,15 @@ import (
 	"strconv"
 )
 
+type PairListResponse struct {
+	Pairs         []string `json:"pairs"`
+	RefreshPeriod int      `json:"refresh_period"`
+}
 type Binance interface {
 	Get24HourTickerData(c *gin.Context)
 	GetTickerForPair(c *gin.Context)
 	Get24HourGainersTickerData(c *gin.Context)
+	Get24HourGainersPairs(c *gin.Context)
 }
 
 type BinanceImpl struct {
@@ -31,7 +35,6 @@ type Ticker binance.TickerData
 //	@Success		200	{array}	TickerData
 //	@Router			/binance/ticker/24hr [get]
 func (h *BinanceImpl) Get24HourTickerData(c *gin.Context) {
-	fmt.Println("TEss")
 	tickerData, err := h.parser.Binance().Get24HourTickerData()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -70,10 +73,35 @@ func (h *BinanceImpl) GetTickerForPair(c *gin.Context) {
 //	@Success		200				{array}	TickerData
 //	@Router			/binance/ticker/24hr/gainers [get]
 func (h *BinanceImpl) Get24HourGainersTickerData(c *gin.Context) {
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "500"))
 	endingFilter := c.DefaultQuery("endingFilter", "")
 
-	ticker, err := h.parser.Binance().Get24HourGainersTickerData(&limit, &endingFilter)
+	ticker, err := h.parser.Binance().Get24HourGainersTickerData(limit, endingFilter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, ticker)
+}
+
+// Get24HourGainersPairs
+//
+//	@Summary		Get the top gainers with a specified limit, filtered by ending and exclusion.
+//	@Description	Retrieve the top gainers with a specified limit, filtered by ending and exclusion.
+//	@Produce		json
+//	@Tags			Binance
+//	@Param			limit			query	int		false	"Limit the number of results"
+//	@Param			endingFilter	query	string	false	"Filter results by ending"
+//	@Param			exclude			query	string	false	"Exclude results with specific ending"
+//	@Success		200				{array}	PairListResponse
+//	@Router			/binance/ticker/24hr/gainers/pairs [get]
+func (h *BinanceImpl) Get24HourGainersPairs(c *gin.Context) {
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
+	endingFilter := c.DefaultQuery("endingFilter", "USDT")
+	excludeFilter := c.DefaultQuery("exclude", "BNB")
+
+	ticker, err := h.parser.Binance().GetTickersGainerForPairs(limit, endingFilter, excludeFilter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
