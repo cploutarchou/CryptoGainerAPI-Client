@@ -18,16 +18,16 @@ type PairListResponse struct {
 	RefreshPeriod int      `json:"refresh_period"`
 }
 
-// Binance is a struct representing the Binance API client.
-type Binance struct {
+// Client is a struct representing the Client API client.
+type Client struct {
 	apiKey    string
 	apiSecret string
 	client    *http.Client
 }
 
-// NewClient creates a new instance of the Binance API client.
-func NewClient(apiKey, apiSecret string) *Binance {
-	return &Binance{
+// NewClient creates a new instance of the Client API client.
+func NewClient(apiKey, apiSecret string) *Client {
+	return &Client{
 		apiKey:    apiKey,
 		apiSecret: apiSecret,
 		client:    &http.Client{},
@@ -35,7 +35,7 @@ func NewClient(apiKey, apiSecret string) *Binance {
 }
 
 // Get24HourTickerData returns 24-hour price statistics mapped to TickerData for all trading pairs.
-func (c *Binance) Get24HourTickerData() ([]TickerData, error) {
+func (c *Client) Get24HourTickerData() ([]TickerData, error) {
 	url := fmt.Sprintf("%s/ticker/24hr", baseURL)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -74,7 +74,7 @@ func (c *Binance) Get24HourTickerData() ([]TickerData, error) {
 }
 
 // GetTickerForPair returns 24-hour price statistics for a specific trading pair.
-func (c *Binance) GetTickerForPair(pairSymbol string) (TickerData, error) {
+func (c *Client) GetTickerForPair(pairSymbol string) (TickerData, error) {
 	url := fmt.Sprintf("%s/ticker/24hr?symbol=%s", baseURL, pairSymbol)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -109,7 +109,7 @@ func (c *Binance) GetTickerForPair(pairSymbol string) (TickerData, error) {
 }
 
 // GetTickersForPairs returns 24-hour price statistics for specific trading pairs.
-func (c *Binance) GetTickersForPairs(pairSymbols []string) ([]TickerData, error) {
+func (c *Client) GetTickersForPairs(pairSymbols []string) ([]TickerData, error) {
 	var tickerDataSlice []TickerData
 
 	for _, pairSymbol := range pairSymbols {
@@ -151,7 +151,7 @@ func (c *Binance) GetTickersForPairs(pairSymbols []string) ([]TickerData, error)
 
 // Get24HourGainersTickerData returns all trading pairs with a positive price change percent
 // of more than +2% over the last 24 hours, sorted by performance (descending order).
-func (b *Binance) Get24HourGainersTickerData(limit int, endingFilter string) ([]TickerData, error) {
+func (b *Client) Get24HourGainersTickerData(limit int, endingFilter string) ([]TickerData, error) {
 	allTickers, err := b.Get24HourTickerData()
 	if err != nil {
 		return nil, err
@@ -183,7 +183,7 @@ func (b *Binance) Get24HourGainersTickerData(limit int, endingFilter string) ([]
 }
 
 // GetTickersGainerForPairs returns formatted trading pair symbols as strings.
-func (c *Binance) GetTickersGainerForPairs(limit int, endingFilter, excludeFilter string) (PairListResponse, error) {
+func (c *Client) GetTickersGainerForPairs(limit int, endingFilter, excludeFilter string) (PairListResponse, error) {
 	// First, fetch all tickers.
 	allTickers, err := c.Get24HourTickerData()
 	if err != nil {
@@ -280,7 +280,7 @@ func extractTradingPairSymbols(data []TickerData, limit int) []string {
 }
 
 // FilterPairsEndingWith returns pairs that end with the specified ending.
-func (c *Binance) FilterPairsEndingWith(ending string) ([]string, error) {
+func (c *Client) FilterPairsEndingWith(ending string) ([]string, error) {
 	tickerData, err := c.Get24HourTickerData()
 	if err != nil {
 		return nil, err

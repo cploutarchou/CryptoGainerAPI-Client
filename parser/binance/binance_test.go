@@ -46,8 +46,8 @@ func TestGet24HourTickerDataForPair(t *testing.T) {
 
 	key := os.Getenv("BINANCE_KEY")
 	secret := os.Getenv("BINANCE_SECRET")
-	// Create a Binance instance using the mock server's URL
-	binanceClient := New(key, secret)
+	// Create a Client instance using the mock server's URL
+	binanceClient := NewClient(key, secret)
 	binanceClient.client = server.Client() // Set the client to the mock server's client
 
 	// Make the API call to the mock server and retrieve BinanceTickerData
@@ -102,8 +102,8 @@ func TestGet24HourTickerData(t *testing.T) {
 
 	key := os.Getenv("BINANCE_KEY")
 	secret := os.Getenv("BINANCE_SECRET")
-	// Create a Binance instance using the mock server's URL
-	binanceClient := New(key, secret)
+	// Create a Client instance using the mock server's URL
+	binanceClient := NewClient(key, secret)
 	binanceClient.client = server.Client() // Set the client to the mock server's client
 
 	// Make the API call to the mock server and retrieve BinanceTickerData

@@ -31,7 +31,7 @@ type Ticker binance.TickerData
 //	@Summary		Get 24-hour ticker data
 //	@Description	Retrieve 24-hour ticker data for all trading pairs.
 //	@Produce		json
-//	@tags			Binance
+//	@tags			Client
 //	@Success		200	{array}	TickerData
 //	@Router			/binance/ticker/24hr [get]
 func (h *BinanceImpl) Get24HourTickerData(c *gin.Context) {
@@ -48,7 +48,7 @@ func (h *BinanceImpl) Get24HourTickerData(c *gin.Context) {
 //	@Summary		Get ticker data for a specific trading pair
 //	@Description	Retrieve ticker data for a specific trading pair.
 //	@Produce		json
-//	@tags			Binance
+//	@tags			Client
 //	@Param			pair	path		string	true	"Trading pair symbol (e.g., BTCUSDT)"
 //	@Success		200		{object}	Ticker
 //	@Router			/binance/ticker/24hr/{pair} [get]
@@ -67,7 +67,7 @@ func (h *BinanceImpl) GetTickerForPair(c *gin.Context) {
 //	@Summary		Get the top gainers with a specified limit, filtered by ending.
 //	@Description	Retrieve the top gainers with a specified limit, filtered by ending.
 //	@Produce		json
-//	@Tags			Binance
+//	@Tags			Client
 //	@Param			limit			query	int		false	"Limit the number of results"
 //	@Param			endingFilter	query	string	false	"Filter results by ending"
 //	@Success		200				{array}	TickerData
@@ -90,7 +90,7 @@ func (h *BinanceImpl) Get24HourGainersTickerData(c *gin.Context) {
 //	@Summary		Get the top gainers with a specified limit, filtered by ending and exclusion.
 //	@Description	Retrieve the top gainers with a specified limit, filtered by ending and exclusion.
 //	@Produce		json
-//	@Tags			Binance
+//	@Tags			Client
 //	@Param			limit			query	int		false	"Limit the number of results"
 //	@Param			endingFilter	query	string	false	"Filter results by ending"
 //	@Param			exclude			query	string	false	"Exclude results with specific ending"
