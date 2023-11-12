@@ -13,6 +13,11 @@ const (
 	baseURL = "https://api.binance.com/api/v3"
 )
 
+type PairListResponse struct {
+	Pairs         []string `json:"pairs"`
+	RefreshPeriod int      `json:"refresh_period"`
+}
+
 // Binance is a struct representing the Binance API client.
 type Client struct {
 	apiKey    string
@@ -189,11 +194,11 @@ func (b *Client) Get24HourGainersTickerData(limit int, endingFilter string) ([]T
 }
 
 // GetTickersGainerForPairs returns formatted trading pair symbols as strings.
-func (c *Client) GetTickersGainerForPairs(limit int, endingFilter, excludeFilter string) ([]string, error) {
+func (c *Client) GetTickersGainerForPairs(limit int, endingFilter, excludeFilter string) (PairListResponse, error) {
 	// First, fetch all tickers.
 	allTickers, err := c.Get24HourTickerData()
 	if err != nil {
-		return nil, err
+		return PairListResponse{}, err
 	}
 
 	// Filter profitable pairs.
@@ -218,7 +223,11 @@ func (c *Client) GetTickersGainerForPairs(limit int, endingFilter, excludeFilter
 
 	// Format the pairs.
 	formattedPairs := formatPairs(tradingPairSymbols, endingFilter)
-	return formattedPairs, nil
+	response := PairListResponse{
+		Pairs:         formattedPairs, // Your list of formatted pairs from the Go function
+		RefreshPeriod: 3600,           // 3600 seconds = 1 hour
+	}
+	return response, nil
 }
 
 // formatPairs takes a slice of symbols and appends a "/" between the base currency and the endingFilter.
