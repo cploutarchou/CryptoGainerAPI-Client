@@ -20,6 +20,7 @@ func main() {
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	parser_, _ := parser.New(cnf)
 	handlers := handler.New(parser_)
+	gin.SetMode(gin.ReleaseMode)
 
 	// Create a Gin router with the specified base path
 	router := gin.Default()
