@@ -20,7 +20,7 @@ func main() {
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	parser_, _ := parser.New(cnf)
 	handlers := handler.New(parser_)
-	gin.SetMode(gin.ReleaseMode)
+	//gin.SetMode(gin.ReleaseMode)
 
 	// Create a Gin router with the specified base path
 	router := gin.Default()
@@ -33,6 +33,14 @@ func main() {
 			binance.GET("/ticker/24hr/:pair", handlers.Binance().GetTickerForPair)
 			binance.GET("/ticker/24hr/gainers", handlers.Binance().Get24HourGainersTickerData)
 			binance.GET("/ticker/24hr/gainers/pairs", handlers.Binance().Get24HourGainersPairs)
+
+		} // Define routes under the "/binance" group
+		bybit := v1.Group("/bybit")
+		{
+			bybit.GET("/ticker/24hr", handlers.Bybit().Get24HourTickerData)
+			bybit.GET("/ticker/24hr/:pair", handlers.Bybit().GetTickerForPair)
+			bybit.GET("/ticker/24hr/gainers", handlers.Bybit().Get24HourGainersTickerData)
+			bybit.GET("/ticker/24hr/gainers/pairs", handlers.Bybit().Get24HourGainersPairs)
 
 		}
 	}

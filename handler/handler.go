@@ -6,6 +6,7 @@ import (
 
 type Handlers interface {
 	Binance() Binance
+	Bybit() Bybit
 }
 
 type HandlersImpl struct {
@@ -18,4 +19,8 @@ func New(parser2 parser.Parser) *HandlersImpl {
 
 func (h *HandlersImpl) Binance() Binance {
 	return NewBinance(h.parser)
+}
+
+func (h *HandlersImpl) Bybit() Bybit {
+	return NewBybit(h.parser)
 }

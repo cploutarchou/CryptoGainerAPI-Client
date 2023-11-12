@@ -1,11 +1,5 @@
 package bybit
 
-import (
-	"encoding/json"
-	"strconv"
-	"strings"
-)
-
 type Response struct {
 	RetCode    int                    `json:"retCode"`
 	RetMsg     string                 `json:"retMsg"`
@@ -33,26 +27,5 @@ type TickerData struct {
 	Turnover24h       string  `json:"turnover24h"`
 	Volume24h         string  `json:"volume24h"`
 	UsdIndexPrice     string  `json:"usdIndexPrice"`
-	Price24hPcntFloat float64 `json:"-"`
-}
-
-func (t *TickerData) UnmarshalJSON(data []byte) error {
-
-	type Alias TickerData
-
-	alias := &struct {
-		*Alias
-	}{
-		Alias: (*Alias)(t),
-	}
-
-	if err := json.Unmarshal(data, &alias); err != nil {
-		return err
-	}
-
-	if pct, err := strconv.ParseFloat(strings.TrimSuffix(t.Price24hPcnt, "%"), 64); err == nil {
-		t.Price24hPcntFloat = pct
-	}
-
-	return nil
+	Price24hPcntFloat float64 `json:"price_24_h_pcnt_float"`
 }

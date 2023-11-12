@@ -141,6 +141,229 @@
                     }
                 }
             }
+        },
+        "/bybit/ticker/24hr": {
+            "get": {
+                "description": "This function fetches the 24-hour ticker data for all trading pairs in a given market (Spot, Linear, Option, or Inverse).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bybit"
+                ],
+                "summary": "Retrieve 24-hour ticker data for the specified market type in Bybit.",
+                "parameters": [
+                    {
+                        "enum": [
+                            "spot",
+                            "linear",
+                            "option",
+                            "inverse"
+                        ],
+                        "type": "string",
+                        "default": "spot",
+                        "description": "Market type (spot, linear, option, inverse)",
+                        "name": "market",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of TickerData representing 24-hour ticker information for each trading pair",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/binance.TickerData"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid market type provided"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/bybit/ticker/24hr/gainers": {
+            "get": {
+                "description": "This function fetches trading pairs that have shown significant price gains over the last 24 hours in a specified market.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bybit"
+                ],
+                "summary": "Retrieve top gainers in a specified market with an optional limit and ending filter.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 500,
+                        "description": "Limit the number of results; default is 500",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter results by a specific ending symbol",
+                        "name": "endingFilter",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "spot",
+                            "linear",
+                            "option",
+                            "inverse"
+                        ],
+                        "type": "string",
+                        "default": "spot",
+                        "description": "Market type (spot, linear, option, inverse); default is 'spot'",
+                        "name": "market",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of TickerData representing top gainers",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/binance.TickerData"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid market type or query parameters"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/bybit/ticker/24hr/gainers/pairs": {
+            "get": {
+                "description": "This function fetches trading pairs that have shown significant price gains over the last 24 hours.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bybit"
+                ],
+                "summary": "Retrieve top gainers in a specified market with filtering options.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Limit the number of results; default is 100",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "USDT",
+                        "description": "Filter results by a specific ending symbol; default is 'USDT'",
+                        "name": "endingFilter",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "BNB",
+                        "description": "Exclude results with a specific ending symbol; default is 'BNB'",
+                        "name": "exclude",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "spot",
+                            "linear",
+                            "option",
+                            "inverse"
+                        ],
+                        "type": "string",
+                        "default": "spot",
+                        "description": "Market type (spot, linear, option, inverse); default is 'spot'",
+                        "name": "market",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of PairListResponse representing top gainers",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handler.PairListResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid market type or query parameters"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/bybit/ticker/24hr/{pair}": {
+            "get": {
+                "description": "This function fetches the latest ticker information for a specified trading pair in a chosen market.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bybit"
+                ],
+                "summary": "Retrieve ticker data for a specific trading pair.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trading pair symbol (e.g., BTCUSDT)",
+                        "name": "pair",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "spot",
+                            "linear",
+                            "option",
+                            "inverse"
+                        ],
+                        "type": "string",
+                        "default": "spot",
+                        "description": "Market type (spot, linear, option, inverse); default is 'spot'",
+                        "name": "market",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "TickerData object containing detailed ticker information for the specified pair",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/binance.TickerData"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid market type or trading pair symbol"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
         }
     },
     "definitions": {
