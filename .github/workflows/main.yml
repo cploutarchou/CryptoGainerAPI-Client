@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: ${DOMAIN}
 
     steps:
       - name: Checkout 🛎
