@@ -1,0 +1,78 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${DOMAIN}
+
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@master
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PUB_KEY }}" > ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa.pub
+          ssh-keyscan -H ${{ secrets.IP }} >> ~/.ssh/known_hosts
+
+      - name: Prepare and Deploy Go Application
+        run: |
+          ssh ${{ secrets.USER_IP }} "
+          REPO_NAME=<repo-name>
+          mkdir -p /home/production/$REPO_NAME &&
+          cd /home/production/$REPO_NAME &&
+          go build -o $REPO_NAME &&
+          sudo tee /etc/systemd/system/$REPO_NAME.service > /dev/null <<EOF
+          [Unit]
+          Description=$REPO_NAME Service
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=root
+          ExecStart=/home/production/$REPO_NAME/$REPO_NAME
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+          sudo systemctl daemon-reload &&
+          sudo systemctl enable $REPO_NAME &&
+          sudo systemctl restart $REPO_NAME &&
+          if [ ! -f /etc/nginx/sites-available/$REPO_NAME ]; then
+            sudo tee /etc/nginx/sites-available/$REPO_NAME > /dev/null <<EOF
+            server {
+              listen 80;
+              server_name ${DOMAIN};
+
+              location / {
+                proxy_pass http://127.0.0.1:8999;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade \$http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host \$host;
+                proxy_cache_bypass \$http_upgrade;
+              }
+            }
+            EOF
+            sudo ln -s /etc/nginx/sites-available/$REPO_NAME /etc/nginx/sites-enabled/
+            sudo systemctl reload nginx
+            sudo certbot --nginx -d ${DOMAIN} --non-interactive --agree-tos --email your-email@example.com
+          fi"
+        env:
+          DOMAIN: ${{ secrets.DOMAIN }}
