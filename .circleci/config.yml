@@ -25,7 +25,6 @@ jobs:
             scp -P $SSH_PORT deploy.sh $USER@$SERVER_IP:/tmp/deploy.sh
             ssh -p $SSH_PORT $USER@$SERVER_IP bash /tmp/deploy.sh $APP_NAME $DOMAIN $EMAIL $REPO
 
-
 workflows:
   version: 2
   build-and-deploy:
