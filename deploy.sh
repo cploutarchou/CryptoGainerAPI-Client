@@ -29,7 +29,10 @@ git pull &&
 # Build the Go application
 go build -o $REPO_NAME &&
 
-# Create a systemd service file for the application
+# Remove the existing systemd service file if it exists
+sudo rm -f /etc/systemd/system/$REPO_NAME.service
+
+# Create a new systemd service file for the application
 sudo tee /etc/systemd/system/$REPO_NAME.service > /dev/null << EOF
 [Unit]
 Description=$REPO_NAME Service
