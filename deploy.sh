@@ -41,7 +41,7 @@ After=network.target
 [Service]
 Type=simple
 User=root
-ExecStart=/home/production/$REPO_NAME/$REPO_NAME
+ExecStart=/home/production/$REPO_NAME/$REPO_NAME/$REPO_NAME
 Restart=on-failure
 
 [Install]
