@@ -13,8 +13,9 @@ jobs:
 
       - run:
           name: Add SSH Key to Known Hosts
-          command: echo "[server_ip]:[port] [host_key]" >> ~/.ssh/known_hosts
+          command: echo "$SERVER_IP $SSH_PORT [host_key]" >> ~/.ssh/known_hosts
 
+      # Deploy Go Application
       - run:
           name: Deploy Go Application
           command: |
