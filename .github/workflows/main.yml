@@ -28,8 +28,6 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa.pub
           ssh-keyscan -H ${{ secrets.IP }}
-          ssh-keyscan -H ${{ secrets.IP }} >> ~/.ssh/known_hosts || echo "Failed to write to known_hosts"
-          cat ~/.ssh/known_hosts
 
       - name: Prepare and Deploy Go Application
         run: |
