@@ -73,5 +73,5 @@ EOF
   sudo systemctl reload nginx
 
   # Obtain an SSL certificate
-  sudo certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email $EMAIL
+  sudo certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email cploutarchou@gmail.com
 fi
