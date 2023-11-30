@@ -4,7 +4,7 @@ set -ex
 REPO_NAME=$1
 DOMAIN=$2
 EMAIL=$3
-GITHUB_REPO_URL=$4
+
 
 # Ensure the production directory exists
 mkdir -p /home/production/$REPO_NAME &&
@@ -12,7 +12,7 @@ cd /home/production/$REPO_NAME &&
 
 # Clone the repository if it doesn't exist
 if [ ! -d "$REPO_NAME" ]; then
-  git clone git@github.com:$GITHUB_REPO_URL
+  git clone git@github.com:cploutarchou/CryptoGainerAPI-Client.git
 fi &&
 
 # Change to the repository directory and pull the latest changes
