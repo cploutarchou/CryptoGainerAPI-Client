@@ -10,10 +10,17 @@ EMAIL=$3
 mkdir -p /home/production/$REPO_NAME &&
 cd /home/production/$REPO_NAME &&
 
-# Clone the repository if it doesn't exist
-if [ ! -d "$REPO_NAME" ]; then
-  git clone git@github.com:cploutarchou/CryptoGainerAPI-Client.git
+# Ensure the production directory exists
+mkdir -p /home/production/$REPO_NAME &&
+cd /home/production/$REPO_NAME &&
+
+# If it's a Git repo, pull changes, otherwise clone the repository
+if [ -d "$REPO_NAME/.git" ]; then
+    git -C $REPO_NAME pull
+else
+    git clone git@github.com:cploutarchou/CryptoGainerAPI-Client.git $REPO_NAME
 fi &&
+
 
 # Change to the repository directory and pull the latest changes
 cd $REPO_NAME &&
