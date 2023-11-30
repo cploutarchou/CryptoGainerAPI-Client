@@ -14,8 +14,8 @@ jobs:
       - run:
           name: Deploy Go Application
           command: |
-            scp deploy.sh $USER@$SERVER_IP:/tmp/deploy.sh
-            ssh $USER@$SERVER_IP bash /tmp/deploy.sh $APP_NAME $DOMAIN $EMAIL
+            scp -P $SSH_PORT deploy.sh $USER@$SERVER_IP:/tmp/deploy.sh
+            ssh -p $SSH_PORT $USER@$SERVER_IP bash /tmp/deploy.sh $APP_NAME $DOMAIN $EMAIL
 
 workflows:
   version: 2
