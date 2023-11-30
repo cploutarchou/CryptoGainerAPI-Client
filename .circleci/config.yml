@@ -1,0 +1,78 @@
+version: 2.1
+
+jobs:
+  deploy:
+    docker:
+      - image: cimg/base:stable  # Base image with essential tools
+    steps:
+      - checkout
+
+      # Setup SSH Keys
+      - add_ssh_keys:
+          fingerprints:
+            - "your-ssh-key-fingerprint"  # Replace with your SSH key fingerprint
+
+      # Prepare and Deploy Go Application
+      - run:
+          name: Deploy Go Application
+          command: |
+            ssh-keyscan -H ${SERVER_IP} >> ~/.ssh/known_hosts
+            ssh ${USER}@${SERVER_IP} "
+            REPO_NAME=${APP_NAME}
+            mkdir -p /home/production/$REPO_NAME &&
+            cd /home/production/$REPO_NAME &&
+            go build -o $REPO_NAME &&
+            sudo tee /etc/systemd/system/$REPO_NAME.service > /dev/null <<EOF
+            [Unit]
+            Description=$REPO_NAME Service
+            After=network.target
+
+            [Service]
+            Type=simple
+            User=root
+            ExecStart=/home/production/$REPO_NAME/$REPO_NAME
+            Restart=on-failure
+
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+            sudo systemctl daemon-reload &&
+            sudo systemctl enable $REPO_NAME &&
+            sudo systemctl restart $REPO_NAME &&
+            if [ ! -f /etc/nginx/sites-available/$REPO_NAME ]; then
+              sudo tee /etc/nginx/sites-available/$REPO_NAME > /dev/null <<EOF
+              server {
+                listen 80;
+                server_name ${DOMAIN};
+
+                location / {
+                  proxy_pass http://127.0.0.1:8999;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade \$http_upgrade;
+                  proxy_set_header Connection 'upgrade';
+                  proxy_set_header Host \$host;
+                  proxy_cache_bypass \$http_upgrade;
+                }
+              }
+              EOF
+              sudo ln -s /etc/nginx/sites-available/$REPO_NAME /etc/nginx/sites-enabled/
+              sudo systemctl reload nginx
+              sudo certbot --nginx -d ${DOMAIN} --non-interactive --agree-tos --email ${EMAIL}
+            fi"
+        environment:
+          DOMAIN: ${DOMAIN}  # Use environment variable set in CircleCI
+          EMAIL: ${EMAIL}
+          SERVER_IP: ${SERVER_IP}
+          USER: ${USER}
+          APP_NAME: ${APP_NAME}
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only:
+                - main
+                - master
