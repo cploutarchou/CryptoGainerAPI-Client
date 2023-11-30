@@ -1,0 +1,37 @@
+version: 2.1
+
+jobs:
+  deploy:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+
+      - add_ssh_keys:
+          fingerprints:
+            - $SSH_KEY_FINGERPRINT
+
+      - run:
+          name: Retrieve and Add SSH Key to Known Hosts
+          command: ssh-keyscan -H -p $SSH_PORT $SERVER_IP >> ~/.ssh/known_hosts
+
+      - run:
+          name: Test SSH Connection
+          command: ssh -o StrictHostKeyChecking=no -p $SSH_PORT $USER@$SERVER_IP echo "SSH connection successful"
+
+      - run:
+          name: Deploy Go Application
+          command: |
+            scp -P $SSH_PORT deploy.sh $USER@$SERVER_IP:/tmp/deploy.sh
+            ssh -p $SSH_PORT $USER@$SERVER_IP bash /tmp/deploy.sh $APP_NAME $DOMAIN
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only:
+                - main
+                - master
