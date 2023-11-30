@@ -27,7 +27,7 @@ jobs:
           echo "${{ secrets.SSH_PUB_KEY }}" > ~/.ssh/id_rsa.pub
           chmod 600 ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa.pub
-
+          ssh-keyscan -H ${{ secrets.IP }} >> ~/.ssh/known_hosts
       - name: Prepare and Deploy Go Application
         run: |
           ssh ${{ secrets.USER_IP }} "
@@ -70,7 +70,7 @@ jobs:
             EOF
             sudo ln -s /etc/nginx/sites-available/$REPO_NAME /etc/nginx/sites-enabled/
             sudo systemctl reload nginx
-            sudo certbot --nginx -d ${DOMAIN} --non-interactive --agree-tos --email your-email@example.com
+            sudo certbot --nginx -d ${DOMAIN} --non-interactive --agree-tos --email ${EMAIL}
           fi"
         env:
           DOMAIN: ${{ secrets.DOMAIN }}
