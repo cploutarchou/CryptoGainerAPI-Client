@@ -4,15 +4,25 @@ set -ex
 REPO_NAME=$1
 DOMAIN=$2
 EMAIL=$3
+GITHUB_REPO_URL=$4  # This will use the REPO environment variable
 
+# Ensure the production directory exists
 mkdir -p /home/production/$REPO_NAME &&
 cd /home/production/$REPO_NAME &&
+
+# Clone the repository if it doesn't exist
 if [ ! -d "$REPO_NAME" ]; then
-  git clone https://github.com/your/repository.git $REPO_NAME
+  git clone $GITHUB_REPO_URL $REPO_NAME
 fi &&
+
+# Change to the repository directory and pull latest changes
 cd $REPO_NAME &&
 git pull &&
+
+# Build the Go application
 go build -o $REPO_NAME &&
+
+# Create a systemd service file for the application
 sudo tee /etc/systemd/system/$REPO_NAME.service > /dev/null <<EOF
 [Unit]
 Description=$REPO_NAME Service
@@ -27,9 +37,13 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 EOF
+
+# Reload systemd to apply new service file, enable and restart the service
 sudo systemctl daemon-reload &&
 sudo systemctl enable $REPO_NAME &&
 sudo systemctl restart $REPO_NAME &&
+
+# Set up Nginx configuration if it doesn't exist
 if [ ! -f /etc/nginx/sites-available/$REPO_NAME ]; then
   sudo tee /etc/nginx/sites-available/$REPO_NAME > /dev/null <<EOF
   server {
@@ -46,7 +60,11 @@ if [ ! -f /etc/nginx/sites-available/$REPO_NAME ]; then
     }
   }
   EOF
+
+  # Enable the Nginx site and reload the Nginx service
   sudo ln -s /etc/nginx/sites-available/$REPO_NAME /etc/nginx/sites-enabled/
   sudo systemctl reload nginx
+
+  # Obtain SSL certificate
   sudo certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email $EMAIL
 fi
