@@ -3,32 +3,30 @@ version: 2.1
 jobs:
   deploy:
     docker:
-      - image: cimg/base:stable  # Base image with essential tools
+      - image: cimg/base:stable
     steps:
       - checkout
 
-      # Setup SSH Keys
       - add_ssh_keys:
           fingerprints:
-            - "your-ssh-key-fingerprint"  # Replace with your SSH key fingerprint
+            - "your-ssh-key-fingerprint"
 
-      # Deploy Go Application
       - run:
           name: Deploy Go Application
           command: |
             set -ex
             ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
-            ssh $USER@$SERVER_IP bash -c "'
+            ssh $USER@$SERVER_IP bash -c "\'
             REPO_NAME=$APP_NAME
             mkdir -p /home/production/$REPO_NAME &&
             cd /home/production/$REPO_NAME &&
-            if [ ! -d \"$REPO_NAME\" ]; then
+            if [ ! -d \\\"$REPO_NAME\\\" ]; then
               git clone https://github.com/your/repository.git $REPO_NAME
             fi &&
             cd $REPO_NAME &&
             git pull &&
             go build -o $REPO_NAME &&
-            sudo tee /etc/systemd/system/$REPO_NAME.service > /dev/null <<EOF
+            sudo tee /etc/systemd/system/$REPO_NAME.service > /dev/null \\\<<EOF
             [Unit]
             Description=$REPO_NAME Service
             After=network.target
@@ -46,7 +44,7 @@ jobs:
             sudo systemctl enable $REPO_NAME &&
             sudo systemctl restart $REPO_NAME &&
             if [ ! -f /etc/nginx/sites-available/$REPO_NAME ]; then
-              sudo tee /etc/nginx/sites-available/$REPO_NAME > /dev/null <<EOF
+              sudo tee /etc/nginx/sites-available/$REPO_NAME > /dev/null \\\<<EOF
               server {
                 listen 80;
                 server_name $DOMAIN;
@@ -65,7 +63,7 @@ jobs:
               sudo systemctl reload nginx
               sudo certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email $EMAIL
             fi
-            '"
+            \'"
 
 workflows:
   version: 2
