@@ -12,6 +12,10 @@ jobs:
             - $SSH_KEY_FINGERPRINT
 
       - run:
+          name: Add SSH Key to Known Hosts
+          command: echo "[server_ip]:[port] [host_key]" >> ~/.ssh/known_hosts
+
+      - run:
           name: Deploy Go Application
           command: |
             scp -P $SSH_PORT deploy.sh $USER@$SERVER_IP:/tmp/deploy.sh
