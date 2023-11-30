@@ -1,7 +1,4 @@
-[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/8xWFaF83UGzqoLTaHXvpfe/4s2uuhZWD7k4mWZyLdaqAG/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/8xWFaF83UGzqoLTaHXvpfe/4s2uuhZWD7k4mWZyLdaqAG/tree/main)
-
-
-
+[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/8xWFaF83UGzqoLTaHXvpfe/4s2uuhZWD7k4mWZyLdaqAG/tree/master.svg?style=svg&circle-token=e1b94e95b1d6be48caf5affe186bdeb0dba2a111)](https://dl.circleci.com/status-badge/redirect/circleci/8xWFaF83UGzqoLTaHXvpfe/4s2uuhZWD7k4mWZyLdaqAG/tree/master)
 # CryptoGainerAPI-Client Main Package Documentation
 
 The `main` package in the CryptoGainerAPI-Client project is the entry point for the application. It initializes the necessary components, sets up API routes, and starts the web server to serve cryptocurrency data using the Gin framework.
