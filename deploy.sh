@@ -4,7 +4,7 @@ set -ex
 REPO_NAME=$1
 DOMAIN=$2
 EMAIL=$3
-GITHUB_REPO_URL=$4  # This will use the REPO environment variable
+GITHUB_REPO_URL=$4  # The full URL of the GitHub repository
 
 # Ensure the production directory exists
 mkdir -p /home/production/$REPO_NAME &&
@@ -15,7 +15,7 @@ if [ ! -d "$REPO_NAME" ]; then
   git clone $GITHUB_REPO_URL $REPO_NAME
 fi &&
 
-# Change to the repository directory and pull latest changes
+# Change to the repository directory and pull the latest changes
 cd $REPO_NAME &&
 git pull &&
 
@@ -38,7 +38,7 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOF
 
-# Reload systemd to apply new service file, enable and restart the service
+# Reload systemd to apply the new service file, enable and restart the service
 sudo systemctl daemon-reload &&
 sudo systemctl enable $REPO_NAME &&
 sudo systemctl restart $REPO_NAME &&
@@ -65,6 +65,6 @@ if [ ! -f /etc/nginx/sites-available/$REPO_NAME ]; then
   sudo ln -s /etc/nginx/sites-available/$REPO_NAME /etc/nginx/sites-enabled/
   sudo systemctl reload nginx
 
-  # Obtain SSL certificate
+  # Obtain an SSL certificate
   sudo certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email $EMAIL
 fi
