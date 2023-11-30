@@ -12,7 +12,7 @@ cd /home/production/$REPO_NAME &&
 
 # Clone the repository if it doesn't exist
 if [ ! -d "$REPO_NAME" ]; then
-  git clone $GITHUB_REPO_URL
+  git clone git@github.com:$GITHUB_REPO_URL
 fi &&
 
 # Change to the repository directory and pull the latest changes
