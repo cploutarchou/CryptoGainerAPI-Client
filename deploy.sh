@@ -45,7 +45,7 @@ sudo systemctl restart $REPO_NAME &&
 
 # Set up Nginx configuration if it doesn't exist
 if [ ! -f /etc/nginx/sites-available/$REPO_NAME ]; then
-  sudo tee /etc/nginx/sites-available/$REPO_NAME > /dev/null <<EOF
+  sudo tee /etc/nginx/sites-available/$REPO_NAME > /dev/null << EOF
   server {
     listen 80;
     server_name $DOMAIN;
