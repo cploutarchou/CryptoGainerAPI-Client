@@ -4,7 +4,7 @@ set -ex
 REPO_NAME=$1
 DOMAIN=$2
 EMAIL=$3
-GITHUB_REPO_URL=$4  # The full URL of the GitHub repository
+GITHUB_REPO_URL=$4
 
 # Ensure the production directory exists
 mkdir -p /home/production/$REPO_NAME &&

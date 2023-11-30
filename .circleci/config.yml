@@ -23,7 +23,7 @@ jobs:
           name: Deploy Go Application
           command: |
             scp -P $SSH_PORT deploy.sh $USER@$SERVER_IP:/tmp/deploy.sh
-            ssh -p $SSH_PORT $USER@$SERVER_IP bash /tmp/deploy.sh $APP_NAME $DOMAIN $EMAIL $REPO
+            ssh -p $SSH_PORT $USER@$SERVER_IP bash /tmp/deploy.sh $APP_NAME $DOMAIN $EMAIL $GITHUB_REPO_URL
 
 workflows:
   version: 2
