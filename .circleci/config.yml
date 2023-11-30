@@ -12,8 +12,12 @@ jobs:
             - $SSH_KEY_FINGERPRINT
 
       - run:
-          name: Add SSH Key to Known Hosts
-          command: echo "$SERVER_IP $SSH_PORT [host_key]" >> ~/.ssh/known_hosts
+          name: Retrieve and Add SSH Key to Known Hosts
+          command: ssh-keyscan -H -p $SSH_PORT $SERVER_IP >> ~/.ssh/known_hosts
+
+      - run:
+          name: Test SSH Connection
+          command: ssh -o StrictHostKeyChecking=no -p $SSH_PORT $USER@$SERVER_IP echo "SSH connection successful"
 
       # Deploy Go Application
       - run:
