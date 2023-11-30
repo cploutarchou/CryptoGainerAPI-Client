@@ -51,8 +51,8 @@ sudo systemctl enable $REPO_NAME &&
 sudo systemctl restart $REPO_NAME &&
 
 # Set up Nginx configuration if it doesn't exist
-if [ ! -f /etc/nginx/sites-available/$REPO_NAME ]; then
-  sudo tee /etc/nginx/sites-available/$REPO_NAME > /dev/null <<EOF
+if [ ! -f /etc/nginx/sites-available/$REPO_NAME.conf ]; then
+  sudo tee /etc/nginx/sites-available/$REPO_NAME.conf > /dev/null <<EOF
   server {
     listen 80;
     server_name $DOMAIN;
@@ -69,7 +69,7 @@ if [ ! -f /etc/nginx/sites-available/$REPO_NAME ]; then
 EOF
 
   # Enable the Nginx site and reload the Nginx service
-  sudo ln -s /etc/nginx/sites-available/$REPO_NAME /etc/nginx/sites-enabled/
+  sudo ln -s /etc/nginx/sites-available/$REPO_NAME.conf /etc/nginx/sites-enabled/
   sudo systemctl reload nginx
 
   # Obtain an SSL certificate
